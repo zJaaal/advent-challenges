@@ -1,3 +1,3 @@
-export const input = ``;
+export const input = `real`;
 
-export const testInput = ``;
+export const testInput = `test`;

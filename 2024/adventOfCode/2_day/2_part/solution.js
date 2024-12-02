@@ -10,5 +10,5 @@ function solution(input) {
   return input;
 }
 
-console.log(solution(input));
-// console.log(solution(testInput));
+// console.log(solution(input));
+console.log(solution(testInput));
