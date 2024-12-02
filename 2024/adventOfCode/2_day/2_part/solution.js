@@ -12,7 +12,7 @@ Any two adjacent levels differ by at least one and at most three.
 
 Now we can have a tolerance of one wrong number
 */
-const MAX_TOLERANCE = 1;
+const MAX_TOLERANCE = 1; // We can remove at most one number
 
 function checkReport(report, tolerance = 0) {
   // TIL: The direction of the sequence is obtained by comparing the first number with the last one
@@ -29,6 +29,7 @@ function checkReport(report, tolerance = 0) {
     // If the difference is not between 1 and 3 or the direction is not the same
     // We can try by removing the current or the next number
     if (diff < 1 || diff > 3 || pairDirection !== sequenceDirection) {
+      // If we have already exhausted the tolerance, we can return false, because we should not remove more numbers
       if (tolerance == MAX_TOLERANCE) {
         return false;
       }
