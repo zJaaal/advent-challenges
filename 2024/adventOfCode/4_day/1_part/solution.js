@@ -14,8 +14,21 @@ It's a little unusual, though, as you don't merely need to find one instance of 
  */
 
 function solution(input) {
-  let count = 0;
   const lettersMatrix = input.split('\n').map((row) => row.split(''));
+
+  // Check all 8 directions from X
+  const directions = [
+    [-1, -1], // upLeft
+    [-1, 1], // upRight
+    [1, -1], // downLeft
+    [1, 1], // downRight
+    [-1, 0], // up
+    [1, 0], // down
+    [0, -1], // left
+    [0, 1], // right
+  ];
+
+  let count = 0;
 
   for (let rowIndex = 0; rowIndex < lettersMatrix.length; rowIndex++) {
     for (
@@ -28,19 +41,7 @@ function solution(input) {
       // Skip if not X
       if (letter !== 'X') continue;
 
-      // Check all 8 directions from X
-      const directions = {
-        right: [0, 1],
-        left: [0, -1],
-        up: [-1, 0],
-        down: [1, 0],
-        upLeft: [-1, -1],
-        upRight: [-1, 1],
-        downLeft: [1, -1],
-        downRight: [1, 1],
-      };
-
-      const words = Object.values(directions).map(
+      const words = directions.map(
         ([rowDelta, colDelta]) =>
           letter +
           lettersMatrix[rowIndex + rowDelta]?.[letterIndex + colDelta] +

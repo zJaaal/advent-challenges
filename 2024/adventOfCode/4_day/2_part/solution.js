@@ -16,7 +16,17 @@ M.S
 
 function solution(input) {
   const lettersMatrix = input.split('\n').map((row) => row.split(''));
+
+  // The 4 possible corners of the current letter
+  const cornersDeltas = [
+    [-1, -1], // upLeft
+    [-1, 1], // upRight
+    [1, -1], // downLeft
+    [1, 1], // downRight
+  ];
+
   let count = 0;
+
   for (let rowIndex = 0; rowIndex < lettersMatrix.length; rowIndex++) {
     for (
       let letterIndex = 0;
@@ -29,28 +39,15 @@ function solution(input) {
       if (letter !== 'A') continue;
 
       // Get the corners of the current letter, which should be A
-      const corners = [
-        {
-          letter: lettersMatrix[rowIndex - 1]?.[letterIndex - 1],
-          row: rowIndex - 1,
-          col: letterIndex - 1,
-        },
-        {
-          letter: lettersMatrix[rowIndex - 1]?.[letterIndex + 1],
-          row: rowIndex - 1,
-          col: letterIndex + 1,
-        },
-        {
-          letter: lettersMatrix[rowIndex + 1]?.[letterIndex - 1],
-          row: rowIndex + 1,
-          col: letterIndex - 1,
-        },
-        {
-          letter: lettersMatrix[rowIndex + 1]?.[letterIndex + 1],
-          row: rowIndex + 1,
-          col: letterIndex + 1,
-        },
-      ];
+      const corners = cornersDeltas.map(([rowDelta, colDelta]) => {
+        const row = rowIndex + rowDelta;
+        const col = letterIndex + colDelta;
+        return {
+          row,
+          col,
+          letter: lettersMatrix[row]?.[col],
+        };
+      });
 
       // Filter the corners that are M and S
       const lettersM = corners.filter((corner) => corner.letter === 'M');
