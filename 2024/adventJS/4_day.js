@@ -12,24 +12,23 @@ All trees have a trunk of two lines, represented by the # character.
 The tree should always have the same length on each side.
 You must ensure the tree has the correct shape using line breaks \n for each line.
 */
-
 function createXmasTree(height, ornament) {
-  const POLE_SPACES = '_'.repeat(height - 1);
-  const POLE = `${POLE_SPACES}#${POLE_SPACES}\n${POLE_SPACES}#${POLE_SPACES}`;
+  const SIDE_SPACE = '_'.repeat(height - 1);
+  const POLE = `${SIDE_SPACE}#${SIDE_SPACE}\n${SIDE_SPACE}#${SIDE_SPACE}`;
 
-  let TREE_TOP = `${POLE_SPACES}${ornament}${POLE_SPACES}\n`;
+  let treeTop = `${SIDE_SPACE}${ornament}${SIDE_SPACE}\n`;
 
-  let TREE = TREE_TOP;
+  let tree = treeTop;
 
   // Match adjacent underscores and replace them with the ornament
   const regex = new RegExp(`_(?=\\${ornament})|(?<=\\${ornament})_`, 'g');
 
   for (let i = 1; i < height; i++) {
-    TREE_TOP = TREE_TOP.replace(regex, ornament);
-    TREE += `${TREE_TOP}`;
+    treeTop = treeTop.replace(regex, ornament);
+    tree += treeTop;
   }
 
-  return `${TREE}${POLE}`;
+  return tree + POLE;
 }
 
 const tree = createXmasTree(5, '*');
