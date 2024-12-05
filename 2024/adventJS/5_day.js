@@ -16,15 +16,14 @@ function organizeShoes(shoes) {
   let shoeMap = {};
   const result = [];
 
-  const SHOE_PAIR_REGEX = /IR|RI/;
+  const SHOE_PAIR_REGEX = /IR|RI/; // regex to check if a pair of shoes is available
 
-  for (let shoe of shoes) {
-    shoeMap[shoe.size] ??= '';
-    shoeMap[shoe.size] += shoe.type;
-
-    SHOE_PAIR_REGEX.test(shoeMap[shoe.size]) &&
-      (result.push(shoe.size), (shoeMap[shoe.size] = ''));
-  }
+  // for of one liner because why not?
+  for (let shoe of shoes)
+    (shoeMap[shoe.size] ??= ''), // if shoeMap[shoe.size] is undefined, set it to ''
+      (shoeMap[shoe.size] += shoe.type), // append shoe type to shoeMap[shoe.size]
+      SHOE_PAIR_REGEX.test(shoeMap[shoe.size]) && // if shoeMap[shoe.size] has a pair
+        (result.push(shoe.size), (shoeMap[shoe.size] = '')); // push shoe size to result and reset shoeMap[shoe.size]
 
   return result;
 }
