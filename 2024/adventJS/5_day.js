@@ -13,17 +13,22 @@ To do this, you should return a list of the available sizes after pairing the bo
 */
 
 function organizeShoes(shoes) {
-  let shoeMap = {};
+  const shoeMap = {};
   const result = [];
+  const PAIRS = /IR|RI/;
 
-  const SHOE_PAIR_REGEX = /IR|RI/; // regex to check if a pair of shoes is available
+  for (let shoe of shoes) {
+    shoeMap[shoe.size] ??= '';
+    shoeMap[shoe.size] += shoe.type;
 
-  // for of one liner because why not?
-  for (let shoe of shoes)
-    (shoeMap[shoe.size] ??= ''), // if shoeMap[shoe.size] is undefined, set it to ''
-      (shoeMap[shoe.size] += shoe.type), // append shoe type to shoeMap[shoe.size]
-      SHOE_PAIR_REGEX.test(shoeMap[shoe.size]) && // if shoeMap[shoe.size] has a pair
-        (result.push(shoe.size), (shoeMap[shoe.size] = '')); // push shoe size to result and reset shoeMap[shoe.size]
+    const shoeTypes = shoeMap[shoe.size];
+
+    if (PAIRS.test(shoeTypes)) {
+      const typesClean = shoeTypes.replace(PAIRS, '');
+      shoeMap[shoe.size] = typesClean;
+      result.push(shoe.size);
+    }
+  }
 
   return result;
 }
@@ -32,7 +37,9 @@ const shoes = [
   { type: 'I', size: 38 },
   { type: 'R', size: 38 },
   { type: 'R', size: 42 },
+  { type: 'R', size: 42 },
   { type: 'I', size: 41 },
+  { type: 'I', size: 42 },
   { type: 'I', size: 42 },
 ];
 
