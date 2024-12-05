@@ -16,7 +16,7 @@ function organizeShoes(shoes) {
   let shoeMap = {};
   const result = [];
 
-  const SHOE_PAIR_REGEX = /IR|RI/g;
+  const SHOE_PAIR_REGEX = /IR|RI/;
 
   for (let shoe of shoes) {
     shoeMap[shoe.size] ??= '';
