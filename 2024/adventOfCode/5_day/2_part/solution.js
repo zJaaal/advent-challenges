@@ -15,6 +15,8 @@ update has the pages in the right order.
 In this part you need to fix the invalid ones and sum the middle value of them.
  */
 // Not really performant, but I'm fine with it.
+// To make it performant, you can use Topological Sort, transform the input into a graph and check if it's a DAG (Graph without cycles)
+// If it's a DAG, you can sort the graph and check if the order of the list are correct using the sorted graph as reference.
 function findIncorrect(order, updatesList) {
   const incorrect = [];
 
