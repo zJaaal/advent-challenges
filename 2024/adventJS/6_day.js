@@ -11,7 +11,12 @@ The * is not on the box's edges.
 Keep in mind that the * can be inside, outside, or may not even be there. We must return true if the * is inside the box and false otherwise.
 */
 function inBox(box) {
-  return /^#.*\*.*#$/gm.test(box.join('\n'));
+  const PATTERN = /^#.*\*.*#$/gm;
+
+  return (
+    !(PATTERN.test(box[0]) || PATTERN.test(box.at(-1))) &&
+    PATTERN.test(box.join('\n'))
+  );
 }
 
 console.log(inBox(['###', '#*#', '###'])); // ➞ true
