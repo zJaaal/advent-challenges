@@ -18,6 +18,7 @@ You have to compute how many possible loops can be created by the guard
 */
 
 // The answer is 1984, my code is off by 148 loops (2132), I'm going to check the loops to see if I can find the error
+// Im burning out. I'll drop this and probably re-take it when I can.
 const directionsDeltas = {
   '^': [-1, 0],
   v: [1, 0],
@@ -37,17 +38,12 @@ function checkLoops(map, row, col, direction, visited) {
   const mapCopy = map.map((row) => row.slice());
   const visitedCopy = structuredClone(visited);
 
-  // console.log(visitedCopy);
-
-  if (mapCopy[row] === undefined || mapCopy[row][col] === undefined)
-    return undefined;
-
   if (direction === '^') {
     // Check if going right we can find a loop
     for (let i = col; i < mapCopy[row].length; i++) {
       if (mapCopy[row][i] === '#' || mapCopy[row][i] === 'O') {
         if (visitedCopy[`${row}-${i}`]?.includes('>')) {
-          mapCopy[row][i - 1] = 'C';
+          // mapCopy[row][i] = 'C';
 
           return mapCopy.map((row) => row.join('')).join('\n');
         }
@@ -69,7 +65,7 @@ function checkLoops(map, row, col, direction, visited) {
     for (let i = col; i >= 0; i--) {
       if (mapCopy[row][i] === '#' || mapCopy[row][i] === 'O') {
         if (visitedCopy[`${row}-${i}`]?.includes('<')) {
-          mapCopy[row][i + 1] = 'C';
+          // mapCopy[row][i] = 'C';
 
           return mapCopy.map((row) => row.join('')).join('\n');
         }
@@ -88,10 +84,9 @@ function checkLoops(map, row, col, direction, visited) {
   if (direction === '>') {
     // Check if going down we can find a loop
     for (let i = row; i < mapCopy.length; i++) {
-      // console.log(mapCopy.map((row) => row.join('')).join('\n'));
       if (mapCopy[i][col] === '#' || mapCopy[i][col] === 'O') {
         if (visitedCopy[`${i}-${col}`]?.includes('v')) {
-          mapCopy[i - 1][col] = 'C';
+          // mapCopy[i][col] = 'C';
 
           return mapCopy.map((row) => row.join('')).join('\n');
         }
@@ -110,21 +105,17 @@ function checkLoops(map, row, col, direction, visited) {
   if (direction === '<') {
     // Check if going up we can find a loop
     for (let i = row; i >= 0; i--) {
-      // console.log(mapCopy[i][col]);
       if (mapCopy[i][col] === '#' || mapCopy[i][col] === 'O') {
         if (visitedCopy[`${i}-${col}`]?.includes('^')) {
-          mapCopy[i + 1][col] = 'C';
+          // mapCopy[i][col] = 'C';
 
-          // console.log(mapCopy.map((row) => row.join('')).join('\n'));
           return mapCopy.map((row) => row.join('')).join('\n');
         }
         console.log('EDGE CASE 4');
         visitedCopy[`${i}-${col}`] = visitedCopy[`${i}-${col}`]
           ? visitedCopy[`${i}-${col}`] + '^'
           : '^';
-        // console.log(mapCopy[i + 1].join(''), col, row, i);
-        // console.log('----------------');
-        // console.log(mapCopy.map((row) => row.join('')).join('\n'));
+
         return checkLoops(mapCopy, i + 1, col, '^', visitedCopy);
       }
 
@@ -158,10 +149,9 @@ function move(map, row, col, direction) {
       ]
         ? globalVisited[`${newRow}-${newCol}`] + direction
         : direction;
+
       return move(map, row, col, currentDirection[direction]);
     } else {
-      const withoutObstruction = map[newRow][newCol];
-
       map[newRow][newCol] = 'O';
 
       if (!loops[`${newRow}-${newCol}`]) {
@@ -178,14 +168,10 @@ function move(map, row, col, direction) {
         }
       }
 
-      map[newRow][newCol] = withoutObstruction;
+      map[newRow][newCol] = direction; // This way i can know if the guard has passed through this cell and the direction it was facing
 
       row = newRow;
       col = newCol;
-      map[row][col] = direction; // This way i can know if the guard has passed through this cell and the direction it was facing
-
-      // console.log(map.map((row) => row.join('')).join('\n'));
-      // console.log('----------------------------------');
     }
   }
 }
