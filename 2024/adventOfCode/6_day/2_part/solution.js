@@ -1,5 +1,4 @@
 import { input, testInput } from '../input.js';
-import fs from 'fs';
 console.clear();
 console.log('----------------------------------');
 
@@ -37,6 +36,8 @@ const currentDirection = {
 let loops = {};
 function move(map, row, col, direction, visited, includesObstacle) {
   const [dx, dy] = directionsDeltas[direction];
+  const mapCopy = map.map((row) => row.slice());
+  const visitedCopy = structuredClone(visited);
 
   // Validate in each step if is possible to go to an already visited cell putting an obstruction in the next cell,
   // if that's the case, we need to add the obstruction symbol (Not needed but I want to see) and count as a loop
@@ -44,58 +45,57 @@ function move(map, row, col, direction, visited, includesObstacle) {
     const newRow = row + dx;
     const newCol = col + dy;
 
-    if (map[newRow] === undefined || map[newRow][newCol] === undefined) {
+    if (
+      mapCopy[newRow] === undefined ||
+      mapCopy[newRow][newCol] === undefined
+    ) {
       return undefined;
     }
 
-    if (map[newRow][newCol] === '#' || map[newRow][newCol] === 'O') {
-      if (visited[`${newRow}-${newCol}`]?.includes(direction)) {
-        map[newRow][newCol] = 'C';
-        return map;
+    if (mapCopy[newRow][newCol] === '#' || mapCopy[newRow][newCol] === 'O') {
+      // If we already hitted this obstacle in the same direction we can assume that we are in a loop
+      if (visitedCopy[`${newRow}-${newCol}`]?.includes(direction)) {
+        mapCopy[newRow][newCol] = 'C';
+        return mapCopy.map((row) => row.join('')).join('\n');
       }
 
-      visited[`${newRow}-${newCol}`] = visited[`${newRow}-${newCol}`]
-        ? visited[`${newRow}-${newCol}`] + direction
+      visitedCopy[`${newRow}-${newCol}`] = visitedCopy[`${newRow}-${newCol}`]
+        ? visitedCopy[`${newRow}-${newCol}`] + direction
         : direction;
 
       return move(
-        map,
+        mapCopy,
         row,
         col,
         currentDirection[direction],
-        structuredClone(visited),
+        visitedCopy,
         includesObstacle
       );
     } else {
-      const mapCopy = map.map((row) => row.slice());
-
       if (!includesObstacle) {
         mapCopy[newRow][newCol] = 'O';
         if (!loops[`${newRow}-${newCol}`]) {
-          // console.log('CHECKING LOOP', loops[`${newCol}-${newRow}`]);
           const loop = move(
             mapCopy,
             row,
             col,
             currentDirection[direction],
-            structuredClone(visited),
+            visitedCopy,
             true
           );
 
           if (loop) {
-            console.log('LOOP', Object.keys(loops).length);
-            console.log('----------------------------------');
-
-            // console.log(loop);
+            console.log('-'.repeat(mapCopy.length));
+            console.log('LOOP', Object.keys(loops).length + 1);
+            console.log('-'.repeat(mapCopy.length));
+            console.log(loop);
 
             loops[`${newRow}-${newCol}`] = loop;
-
-            // fs.appendFileSync('loops.txt', loop + '\n\n\n');
           }
         }
       }
 
-      map[newRow][newCol] = direction; // This way i can know if the guard has passed through this cell and the direction it was facing
+      mapCopy[newRow][newCol] = direction; // This way i can know if the guard has passed through this cell and the direction it was facing
 
       row = newRow;
       col = newCol;
@@ -104,17 +104,15 @@ function move(map, row, col, direction, visited, includesObstacle) {
 }
 
 function solution(input) {
-  fs.writeFileSync('loops.txt', '');
-  let globalVisited = {};
   const map = input.split('\n').map((row) => row.split(''));
 
   const startRow = map.findIndex((row) => row.includes('^'));
   const startCol = map[startRow].indexOf('^');
 
-  move(map, startRow, startCol, '^', globalVisited, false);
+  move(map, startRow, startCol, '^', {}, false);
 
   return Object.keys(loops).length;
 }
 
-console.log(solution(input));
+// console.log(solution(input));
 // console.log(solution(testInput));
