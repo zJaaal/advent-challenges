@@ -34,101 +34,8 @@ const currentDirection = {
   '<': '^',
 };
 
-function checkLoops(map, row, col, direction, visited) {
-  const mapCopy = map.map((row) => row.slice());
-  const visitedCopy = structuredClone(visited);
-
-  if (direction === '^') {
-    // Check if going right we can find a loop
-    for (let i = col; i < mapCopy[row].length; i++) {
-      if (mapCopy[row][i] === '#' || mapCopy[row][i] === 'O') {
-        if (visitedCopy[`${row}-${i}`]?.includes('>')) {
-          // mapCopy[row][i] = 'C';
-
-          return mapCopy.map((row) => row.join('')).join('\n');
-        }
-
-        console.log('EDGE CASE 1');
-        visitedCopy[`${row}-${i}`] = visitedCopy[`${row}-${i}`]
-          ? visitedCopy[`${row}-${i}`] + '>'
-          : '>';
-
-        return checkLoops(mapCopy, row, i - 1, '>', visitedCopy);
-      }
-
-      mapCopy[row][i] = '>';
-    }
-  }
-
-  if (direction === 'v') {
-    // Check if going left we can find a loop
-    for (let i = col; i >= 0; i--) {
-      if (mapCopy[row][i] === '#' || mapCopy[row][i] === 'O') {
-        if (visitedCopy[`${row}-${i}`]?.includes('<')) {
-          // mapCopy[row][i] = 'C';
-
-          return mapCopy.map((row) => row.join('')).join('\n');
-        }
-        console.log('EDGE CASE 2');
-        visitedCopy[`${row}-${i}`] = visitedCopy[`${row}-${i}`]
-          ? visitedCopy[`${row}-${i}`] + '<'
-          : '<';
-
-        return checkLoops(mapCopy, row, i + 1, '<', visitedCopy);
-      }
-
-      mapCopy[row][i] = '<';
-    }
-  }
-
-  if (direction === '>') {
-    // Check if going down we can find a loop
-    for (let i = row; i < mapCopy.length; i++) {
-      if (mapCopy[i][col] === '#' || mapCopy[i][col] === 'O') {
-        if (visitedCopy[`${i}-${col}`]?.includes('v')) {
-          // mapCopy[i][col] = 'C';
-
-          return mapCopy.map((row) => row.join('')).join('\n');
-        }
-        visitedCopy[`${i}-${col}`] = visitedCopy[`${i}-${col}`]
-          ? visitedCopy[`${i}-${col}`] + 'v'
-          : 'v';
-        console.log('EDGE CASE 3');
-
-        return checkLoops(mapCopy, i - 1, col, 'v', visitedCopy);
-      }
-
-      mapCopy[i][col] = 'v';
-    }
-  }
-
-  if (direction === '<') {
-    // Check if going up we can find a loop
-    for (let i = row; i >= 0; i--) {
-      if (mapCopy[i][col] === '#' || mapCopy[i][col] === 'O') {
-        if (visitedCopy[`${i}-${col}`]?.includes('^')) {
-          // mapCopy[i][col] = 'C';
-
-          return mapCopy.map((row) => row.join('')).join('\n');
-        }
-        console.log('EDGE CASE 4');
-        visitedCopy[`${i}-${col}`] = visitedCopy[`${i}-${col}`]
-          ? visitedCopy[`${i}-${col}`] + '^'
-          : '^';
-
-        return checkLoops(mapCopy, i + 1, col, '^', visitedCopy);
-      }
-
-      mapCopy[i][col] = '^';
-    }
-  }
-
-  return undefined;
-}
-
-let globalVisited = {};
 let loops = {};
-function move(map, row, col, direction) {
+function move(map, row, col, direction, visited, includesObstacle) {
   const [dx, dy] = directionsDeltas[direction];
 
   // Validate in each step if is possible to go to an already visited cell putting an obstruction in the next cell,
@@ -138,33 +45,53 @@ function move(map, row, col, direction) {
     const newCol = col + dy;
 
     if (map[newRow] === undefined || map[newRow][newCol] === undefined) {
-      map[row][col] = direction;
-
-      return map;
+      return undefined;
     }
 
-    if (map[newRow][newCol] === '#') {
-      globalVisited[`${newRow}-${newCol}`] = globalVisited[
-        `${newRow}-${newCol}`
-      ]
-        ? globalVisited[`${newRow}-${newCol}`] + direction
+    if (map[newRow][newCol] === '#' || map[newRow][newCol] === 'O') {
+      if (visited[`${newRow}-${newCol}`]?.includes(direction)) {
+        map[newRow][newCol] = 'C';
+        return map;
+      }
+
+      visited[`${newRow}-${newCol}`] = visited[`${newRow}-${newCol}`]
+        ? visited[`${newRow}-${newCol}`] + direction
         : direction;
 
-      return move(map, row, col, currentDirection[direction]);
+      return move(
+        map,
+        row,
+        col,
+        currentDirection[direction],
+        structuredClone(visited),
+        includesObstacle
+      );
     } else {
-      map[newRow][newCol] = 'O';
+      const mapCopy = map.map((row) => row.slice());
 
-      if (!loops[`${newRow}-${newCol}`]) {
-        const loop = checkLoops(map, row, col, direction, globalVisited);
+      if (!includesObstacle) {
+        mapCopy[newRow][newCol] = 'O';
+        if (!loops[`${newRow}-${newCol}`]) {
+          // console.log('CHECKING LOOP', loops[`${newCol}-${newRow}`]);
+          const loop = move(
+            mapCopy,
+            row,
+            col,
+            currentDirection[direction],
+            structuredClone(visited),
+            true
+          );
 
-        if (loop) {
-          console.log('LOOP');
+          if (loop) {
+            console.log('LOOP', Object.keys(loops).length);
+            console.log('----------------------------------');
 
-          // console.log(loop);
+            // console.log(loop);
 
-          loops[`${newRow}-${newCol}`] = loop;
+            loops[`${newRow}-${newCol}`] = loop;
 
-          fs.appendFileSync('loops.txt', loop + '\n\n\n');
+            // fs.appendFileSync('loops.txt', loop + '\n\n\n');
+          }
         }
       }
 
@@ -178,12 +105,13 @@ function move(map, row, col, direction) {
 
 function solution(input) {
   fs.writeFileSync('loops.txt', '');
+  let globalVisited = {};
   const map = input.split('\n').map((row) => row.split(''));
 
   const startRow = map.findIndex((row) => row.includes('^'));
   const startCol = map[startRow].indexOf('^');
 
-  move(map, startRow, startCol, '^');
+  move(map, startRow, startCol, '^', globalVisited, false);
 
   return Object.keys(loops).length;
 }
