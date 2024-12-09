@@ -72,8 +72,8 @@ function move(map, row, col, direction, visited, includesObstacle) {
       );
     } else {
       if (!includesObstacle && (startRow !== newRow || startCol !== newCol)) {
-        // The fix is to simulate from the starting point and it makes sense because the apparition of the obstacle can lead to a different path from the beggining
-        const startingMap = input.split('\n').map((row) => row.split(''));
+        // The fix is to simulate from the starting point and it makes sense because the apparition of the obstacle requires to reset the visited cells
+        // Because the visited cells can change in order and direction
 
         startingMap[newRow][newCol] = 'O';
 
