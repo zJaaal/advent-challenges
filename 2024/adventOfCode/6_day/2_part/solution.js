@@ -39,6 +39,8 @@ function move(map, row, col, direction, visited, includesObstacle) {
   const mapCopy = map.map((row) => row.slice());
   const visitedCopy = structuredClone(visited);
 
+  // console.log(mapCopy.map((row) => row.join('')).join('\n'));
+
   // Validate in each step if is possible to go to an already visited cell putting an obstruction in the next cell,
   // if that's the case, we need to add the obstruction symbol (Not needed but I want to see) and count as a loop
   while (true) {
@@ -72,23 +74,20 @@ function move(map, row, col, direction, visited, includesObstacle) {
         includesObstacle
       );
     } else {
-      if (!includesObstacle) {
-        mapCopy[newRow][newCol] = 'O';
+      if (!includesObstacle && (startRow !== newRow || startCol !== newCol)) {
+        // The fix is to simulate from the starting point and it makes sense because the apparition of the obstacle can lead to a different path from the beggining
+        const startingMap = input.split('\n').map((row) => row.split(''));
+
+        startingMap[newRow][newCol] = 'O';
+
         if (!loops[`${newRow}-${newCol}`]) {
-          const loop = move(
-            mapCopy,
-            row,
-            col,
-            currentDirection[direction],
-            visitedCopy,
-            true
-          );
+          const loop = move(startingMap, startRow, startCol, '^', {}, true);
 
           if (loop) {
             console.log('-'.repeat(mapCopy.length));
             console.log('LOOP', Object.keys(loops).length + 1);
             console.log('-'.repeat(mapCopy.length));
-            console.log(loop);
+            // console.log(loop);
 
             loops[`${newRow}-${newCol}`] = loop;
           }
@@ -103,16 +102,18 @@ function move(map, row, col, direction, visited, includesObstacle) {
   }
 }
 
+let startRow, startCol;
+
 function solution(input) {
   const map = input.split('\n').map((row) => row.split(''));
 
-  const startRow = map.findIndex((row) => row.includes('^'));
-  const startCol = map[startRow].indexOf('^');
+  startRow = map.findIndex((row) => row.includes('^'));
+  startCol = map[startRow].indexOf('^');
 
   move(map, startRow, startCol, '^', {}, false);
 
   return Object.keys(loops).length;
 }
 
-// console.log(solution(input));
+console.log(solution(input));
 // console.log(solution(testInput));
