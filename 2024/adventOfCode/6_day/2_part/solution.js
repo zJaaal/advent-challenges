@@ -16,8 +16,7 @@ Now you can time travel and put an obstruction so the guard enters in an infinit
 You have to compute how many possible loops can be created by the guard
 */
 
-// The answer is 1984, my code is off by 148 loops (2132), I'm going to check the loops to see if I can find the error
-// Im burning out. I'll drop this and probably re-take it when I can.
+// Code fixed. Answer 1984.
 const directionsDeltas = {
   '^': [-1, 0],
   v: [1, 0],
@@ -38,8 +37,6 @@ function move(map, row, col, direction, visited, includesObstacle) {
   const [dx, dy] = directionsDeltas[direction];
   const mapCopy = map.map((row) => row.slice());
   const visitedCopy = structuredClone(visited);
-
-  // console.log(mapCopy.map((row) => row.join('')).join('\n'));
 
   // Validate in each step if is possible to go to an already visited cell putting an obstruction in the next cell,
   // if that's the case, we need to add the obstruction symbol (Not needed but I want to see) and count as a loop
