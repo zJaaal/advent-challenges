@@ -22,67 +22,52 @@ const COST = {
   b: 1,
 };
 
-let possibleResult = Number.MAX_SAFE_INTEGER;
-let memo = {};
+// Found out these are literal vectors
+function getQuantityOfPushes({ a, b, prize }) {
+  // Create 2 equations using the vectors and the point to achieve and align the values of one of the values to eliminate it
+  // V1xa + V2xb = Px -> 3a + b = 10 Ex.
+  // V1ya + V2yb = Py -> 1a + 2b = 1 Ex.
 
-function simulatePush(game, aCount, bCount) {
-  const key = `${game.prize.x}-${game.prize.y}-${aCount}-${bCount}`;
+  // We align the value of a to get rid of it
+  // V1y(V1xa + V2xb) = Pxa
+  // V1x(V1ya + V2yb) = Pya
 
-  if (memo[key]) return memo[key];
-
-  const finalCost = aCount * COST.a + bCount * COST.b;
-  if (
-    finalCost >= possibleResult ||
-    possibleResult != Number.MAX_SAFE_INTEGER ||
-    game.prize.x < 0 ||
-    game.prize.y < 0
-  ) {
-    memo[key] = Number.MAX_SAFE_INTEGER;
-
-    return Number.MAX_SAFE_INTEGER;
-  }
-
-  if (!game.prize.x && !game.prize.y) {
-    possibleResult = Math.min(possibleResult, finalCost);
-
-    return possibleResult;
-  }
-
-  if (aCount > 100 || bCount > 100) {
-    memo[key] = Number.MAX_SAFE_INTEGER;
-    return Number.MAX_SAFE_INTEGER;
-  }
-
-  // Simulate pushing A
-  const pushA = simulatePush(
-    {
-      ...game,
-      prize: {
-        x: game.prize.x - game.a.x,
-        y: game.prize.y - game.a.y,
-      },
+  const alignA = {
+    a: {
+      x: a.x * a.y,
+      y: b.x * a.y,
+      equal: prize.x * a.y,
     },
-    aCount + 1,
-    bCount
-  );
-
-  const pushB = simulatePush(
-    {
-      ...game,
-      prize: {
-        x: game.prize.x - game.b.x,
-        y: game.prize.y - game.b.y,
-      },
+    b: {
+      x: a.y * a.x,
+      y: b.y * a.x,
+      equal: prize.y * a.x,
     },
-    aCount,
-    bCount + 1
-  );
+  };
 
-  const result = Math.min(pushA, pushB);
+  // Difference of the equations
+  //(V1yV1xa - V1xV1ya) + (V1yV2xb - V1xV2yb) = Pxa - Pya
+  // 0 + (V1yV2xb - V1xV2yb) = Pxa - Pya
+  // b(V1yV2x - V1xV2y) = Pxa - Pya
+  // b = (Pxa - Pya) / (V1yV2x - V1xV2y)
+  const bResult =
+    -1 * ((alignA.b.equal - alignA.a.equal) / (alignA.a.y - alignA.b.y));
 
-  memo[key] = result;
+  // This comes from the first equation
+  const aResult = -1 * ((b.x * bResult - prize.x) / a.x);
 
-  return result;
+  // Comprobate the equations, if they satisfy then return the results, otherwise return 0
+  const equation1 = a.x * aResult + b.x * bResult;
+  const equation2 = a.y * aResult + b.y * bResult;
+
+  return equation1 == prize.x && // Satisfy the equation
+    equation2 == prize.y && // Satisfy the equation
+    aResult <= 100 && // If less than 100 presses
+    bResult <= 100 && // If less than 100 presses
+    aResult % 1 === 0 && // Half presses are not allowed so the decimal solutions are not allowed
+    bResult % 1 === 0 // Half presses are not allowed so the decimal solutions are not allowed
+    ? [aResult, bResult]
+    : [0, 0];
 }
 
 function solution(input) {
@@ -92,36 +77,33 @@ function solution(input) {
     return {
       a: {
         token: 'a',
-        x: a.match(/\d+/g)[0],
-        y: a.match(/\d+/g)[1],
+        x: Number(a.match(/\d+/g)[0]),
+        y: Number(a.match(/\d+/g)[1]),
       },
       b: {
         token: 'b',
-        x: b.match(/\d+/g)[0],
-        y: b.match(/\d+/g)[1],
+        x: Number(b.match(/\d+/g)[0]),
+        y: Number(b.match(/\d+/g)[1]),
       },
       prize: {
-        x: prize.match(/\d+/g)[0],
-        y: prize.match(/\d+/g)[1],
+        x: Number(prize.match(/\d+/g)[0]),
+        y: Number(prize.match(/\d+/g)[1]),
       },
     };
   });
 
   const resultsPerGame = games
     .map((game) => {
-      simulatePush(game, 0, 0);
+      const [aResult, bResult] = getQuantityOfPushes(game);
 
-      const gamePossibleResult = possibleResult;
+      // Calculate the cost in tokens
+      const aCost = aResult * COST.a;
+      const bCost = bResult * COST.b;
 
-      // console.log(gamePossibleResult);
-
-      possibleResult = Number.MAX_SAFE_INTEGER;
-
-      memo = {};
-
-      return gamePossibleResult;
+      // Sum the costs
+      return aCost + bCost;
     })
-    .filter((result) => result != Number.MAX_SAFE_INTEGER)
+
     .reduce((acc, curr) => acc + curr, 0);
 
   return resultsPerGame;
