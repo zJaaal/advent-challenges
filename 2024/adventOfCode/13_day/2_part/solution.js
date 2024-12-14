@@ -60,6 +60,7 @@ function getQuantityOfPushes({ a, b, prize }) {
   const equation1 = a.x * aResult + b.x * bResult;
   const equation2 = a.y * aResult + b.y * bResult;
 
+  // here we check less things, because in this case we can do N moves and also they are all full integers with no decimals
   return equation1 == prize.x && equation2 == prize.y
     ? [aResult, bResult]
     : [0n, 0n];
